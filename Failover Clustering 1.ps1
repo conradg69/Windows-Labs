@@ -1,47 +1,32 @@
-$labname = 'FailOverLab1'
-New-LabDefinition -Name $labname -DefaultVirtualizationEngine HyperV
+$labname = 'FailOverLab2'
+New-LabDefinition -Name $labname -DefaultVirtualizationEngine HyperV -Path C:\AutomatedLabs -VmPath C:\AutomatedLab-VMs
 
-Add-LabDomainDefinition -Name contoso.com -AdminUser Install -AdminPassword Somepass1
+Add-LabDomainDefinition -Name TestLab2.com -AdminUser Conrad -AdminPassword Password1
 
-Set-LabInstallationCredential -Username Install -Password Somepass1
+Set-LabInstallationCredential -Username Conrad -Password Password1
 
-Add-LabVirtualNetworkDefinition -Name $labname -AddressSpace 192.168.50.0/24
+Add-LabVirtualNetworkDefinition -Name $labname -AddressSpace 192.168.60.0/24
 
 $PSDefaultParameterValues = @{
     'Add-LabMachineDefinition:OperatingSystem' = 'Windows Server 2016 SERVERDATACENTER'
     'Add-LabMachineDefinition:Network'         = $labname
-    'Add-LabMachineDefinition:DomainName'      = 'contoso.com'
-    'Add-LabMachineDefinition:Memory'          = 1GB
+    'Add-LabMachineDefinition:DomainName'      = 'TestLab2.com'
+    'Add-LabMachineDefinition:Memory'          = 512MB
 }
 
-Add-LabMachineDefinition -Name foDC1 -Roles RootDC
+Add-LabMachineDefinition -Name ClusterDomain1 -Roles RootDC
 
 # Integrate an iSCSI Target into your machines
 $storageRole = Get-LabMachineRoleDefinition -Role FailoverStorage -Properties @{LunDrive = 'D' }
-Add-LabDiskDefinition -Name LunDisk -DiskSizeInGb 26
-Add-LabMachineDefinition -Name foCLS1 -Roles $storageRole -DiskName LunDisk
+Add-LabDiskDefinition -Name LunDisk2 -DiskSizeInGb 26
+Add-LabMachineDefinition -Name ClusterStorage -Roles $storageRole -DiskName LunDisk2
 
 # Integrate one or more clusters
 # This sample will create two named clusters and one automatic cluster called ALCluster with an automatic static IP
-$cluster1 = Get-LabMachineRoleDefinition -Role FailoverNode -Properties @{ ClusterName = 'Clu1'; ClusterIp = '192.168.50.111' }
-$cluster2 = Get-LabMachineRoleDefinition -Role FailoverNode -Properties @{ ClusterName = 'Clu2'; ClusterIp = '192.168.50.121' }
-$cluster3 = Get-LabMachineRoleDefinition -Role FailoverNode
-foreach ( $i in 1..10 )
-{
-    if (-not ($i % 2))
-    {
-        Add-LabMachineDefinition -name foCLN$i -Roles $cluster1
-    }
-    elseif (-not ($i % 3))
-    {
-        Add-LabMachineDefinition -name foCLN$i -Roles $cluster2
-    }
-    else
-    {
-        Add-LabMachineDefinition -name foCLN$i -Roles $cluster3
-    }
-    
-}
+$cluster1 = Get-LabMachineRoleDefinition -Role FailoverNode -Properties @{ ClusterName = 'Cluster1'; ClusterIp = '192.168.60.111' }
+
+Add-LabMachineDefinition -name ClusterNode1 -Roles $cluster1
+Add-LabMachineDefinition -name ClusterNode2 -Roles $cluster1
 
 Install-Lab
 
