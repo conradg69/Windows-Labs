@@ -11,7 +11,7 @@ $PSDefaultParameterValues = @{
     'Add-LabMachineDefinition:OperatingSystem' = 'Windows Server 2008 R2 SERVERENTERPRISE'
     'Add-LabMachineDefinition:Network'         = $labname
     'Add-LabMachineDefinition:DomainName'      = '2008TestLab.com'
-    'Add-LabMachineDefinition:Memory'          = 256MB
+    'Add-LabMachineDefinition:Memory'          = 512MB
 }
 
 Add-LabMachineDefinition -Name fClusterDomain -Roles RootDC
