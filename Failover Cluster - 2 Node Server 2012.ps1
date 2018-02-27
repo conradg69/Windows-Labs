@@ -31,3 +31,6 @@ Add-LabMachineDefinition -name ClusterNode2 -Roles $cluster1
 Install-Lab
 
 Show-LabDeploymentSummary
+
+
+
